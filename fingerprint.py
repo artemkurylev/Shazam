@@ -13,7 +13,7 @@ from hashlib import md5
 
 
 def create_fingerprint(audio_path):
-    audio, sr = librosa.load(audio_path, 44100)
+    audio, sr = librosa.load(audio_path, 22050)
     stft = np.log10(np.abs(librosa.stft(y=audio, n_fft=1024))) * 10
     stft[stft == -np.inf] = 0
     print(stft.shape)
@@ -21,11 +21,11 @@ def create_fingerprint(audio_path):
     print(librosa.get_duration(audio) * 1000 / len(array))
     peaks = []
     window_size = 10
-    for i in range(0, len(array), window_size*2):
+    for i in range(0, len(array), window_size * 2):
         lb = max(0, i-window_size)
         rb = min(i + window_size, len(array))
         frame_peaks = []
-        for j in range(0, len(array[i]), window_size*2):
+        for j in range(0, len(array[i]), window_size * 2):
             bb = max(j - window_size, 0)
             ub = min(j + window_size, len(array[i]))
 
@@ -37,7 +37,7 @@ def create_fingerprint(audio_path):
             max_j = result[1][0]
             max_i -= window_size
             max_j -= window_size
-            if array[i+max_i][j + max_j] > 0.1:
+            if array[i+max_i][j + max_j] > 0.05:
                 frame_peaks.append([j + max_j, i+max_i])
         peaks.extend(frame_peaks)
 
@@ -64,10 +64,8 @@ def create_fingerprint(audio_path):
 
 if __name__ == '__main__':
     names_peaks = {}
-    for i in os.listdir('audio_database/')[:5]:
-        print(i)
+    for i in os.listdir('audio_database/'):
         peaks = create_fingerprint(os.path.join('audio_database', i))
-
         names_peaks.update({i: set(peaks)})
     with open('test_dir/track_peaks.p', 'wb') as wf:
         pickle.dump(names_peaks, wf)
