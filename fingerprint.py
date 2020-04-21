@@ -12,7 +12,7 @@ import pickle
 from hashlib import md5
 
 
-def create_fingerprint(audio_path):
+def create_fingerprint(audio_path, id, index):
     audio, sr = librosa.load(audio_path, 22050)
     stft = np.log10(np.abs(librosa.stft(y=audio, n_fft=1024))) * 10
     stft[stft == -np.inf] = 0
@@ -41,7 +41,6 @@ def create_fingerprint(audio_path):
                 frame_peaks.append([j + max_j, i+max_i])
         peaks.extend(frame_peaks)
 
-    hashpeaks = []
     pair_num = 20
     peaks = sorted(peaks, key=lambda s: s[1])
     for i in range(len(peaks)):
@@ -57,15 +56,22 @@ def create_fingerprint(audio_path):
             if 0 <= t_delta < 200:
                 string = str(str(freq1)+'|'+str(freq2) + '|'+str(t_delta))
                 x = hashlib.sha1(string.encode())
-                hashpeaks.append((x.hexdigest(), t_delta))
+                if x.hexdigest() in index:
+                    index[x.hexdigest()].append((t1, id))
+                else:
+                    index.update({x.hexdigest(): [(t1, id)]})
 
-    return hashpeaks
+    return index
 
 
 if __name__ == '__main__':
-    names_peaks = {}
-    for i in os.listdir('audio_database/'):
-        peaks = create_fingerprint(os.path.join('audio_database', i))
-        names_peaks.update({i: set(peaks)})
-    with open('test_dir/track_peaks.p', 'wb') as wf:
-        pickle.dump(names_peaks, wf)
+    index = {}
+    id_names = {}
+    for idx, i in enumerate(os.listdir('audio_database/')):
+        index = create_fingerprint(os.path.join('audio_database', i), idx, index)
+        id_names.update({idx: i})
+    with open('test_dir/index.p', 'wb') as wf:
+        pickle.dump(index, wf)
+
+    with open('test_dir/track_ids.p', 'wb') as wf:
+        pickle.dump(id_names, wf)
