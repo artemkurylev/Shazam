@@ -3,10 +3,10 @@ import logging
 import json
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
-from urllib.parse import pa
 from os import curdir, sep
 from fingerprint import create_fingerprint
-import
+
+
 class Server(BaseHTTPRequestHandler):
     def _set_response(self):
         self.send_response(200)
@@ -21,7 +21,7 @@ class Server(BaseHTTPRequestHandler):
         with open('1.wav', 'wb') as wf:
             wf.write(post_data)
             wf.close()
-            create_fingerprint('1.wav')
+            create_fingerprint('1.wav',-1,{})
         logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n",
                      str(self.path), str(self.headers), post_data.decode('utf-8'))
         self.send_response(200)
@@ -30,8 +30,8 @@ class Server(BaseHTTPRequestHandler):
         self._set_response()
         self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
 
-
     def do_GET(self):
+        mimetype = 'text/html'
         try:
             if self.path == "/":
                 self.path = "/index.html"
@@ -54,7 +54,7 @@ class Server(BaseHTTPRequestHandler):
                 mimetype = 'text/css'
                 sendReply = True
 
-            if sendReply == True:
+            if sendReply:
                 # Open the static file requested and send it
                 f = open(curdir + sep + self.path,'rb')
                 self.send_response(200)
