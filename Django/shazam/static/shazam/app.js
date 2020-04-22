@@ -98,7 +98,23 @@ function createDownloadLink(blob) {
     //add the new audio and a elements to the li element
     li.appendChild(au);
     li.appendChild(link);
-        //add the li element to the ordered list
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+    //add the li element to the ordered list
     var filename = new Date().toISOString();
     //filename to send to server without extension
     //upload link
@@ -114,7 +130,9 @@ function createDownloadLink(blob) {
         };
         var fd = new FormData();
         fd.append("audio_data", blob, filename);
-        xhr.open("POST",url="server.py");
+
+        xhr.open("POST",url="upload_audio/");
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
         xhr.send(fd);
     })
     li.appendChild(document.createTextNode(" ")) //add a space in between

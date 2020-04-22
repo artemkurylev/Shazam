@@ -1,7 +1,6 @@
 import pickle
 from fingerprint import create_fingerprint
 import time
-
 if __name__ == '__main__':
     with open('../test_dir/index.p','rb') as rf:
         index = pickle.load(rf)
