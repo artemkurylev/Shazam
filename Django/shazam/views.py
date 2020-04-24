@@ -54,7 +54,14 @@ def upload_audio(request):
     song = Song.objects.using('postgres').get(id=song_id)
     print(song.name)
     return HttpResponse("Found song:{}".format(song.name))
-            # all_matches.extend(matches)
 
 
-    return HttpResponse("Found matches:{}".format(all_matches))
+def upload_song(request):
+    template = loader.get_template('shazam/upload_song.html')
+    return HttpResponse(template.render())
+
+
+@csrf_protect
+def song_uploaded(request):
+    audio_file = request.FILES.get('audio_data').read()
+    return HttpResponse('Song uploadedd!')
