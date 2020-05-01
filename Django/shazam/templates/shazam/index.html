@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shazam</title>
+
+
+</head>
+<body>
+<h1>SUPER SHAZAM APP</h1>
+<h2>Upload song part</h2>
+<div id="controls">
+    <button id="recordButton">Record</button>
+    <button id="pauseButton" disabled>Pause</button>
+    <button id="stopButton" disabled>Stop</button>
+</div>
+<h3>Recordings</h3>
+<ol id="recordingsList"></ol>
+<h2>Upload your own song</h2>
+<form enctype="multipart/form-data" method="post" action="song_uploaded/">
+    {% csrf_token %}
+    <label>
+        Song name:
+        <input type="text" name="song_name">
+    </label>
+
+    <label>
+        Song author:
+        <input type="text" name="author">
+    </label>
+    <input id="default_file" type="file" name="music" accept="audio/*">
+
+
+
+    <button>Upload Song</button>
+</form>
+</body>
+</html>
+{% load static %}
+<!-- inserting these scripts at the end to be able to use all the elements in the DOM -->
+<script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
+
+<script src="{% static 'shazam/app.js' %}"></script>
