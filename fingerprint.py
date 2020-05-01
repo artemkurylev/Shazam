@@ -20,7 +20,8 @@ def create_fingerprint(audio_path, id, index):
     array = np.transpose(stft)
     print(librosa.get_duration(audio) * 1000 / len(array))
     peaks = []
-    window_size = 10
+    window_size = 20
+
     for i in range(0, len(array), window_size * 2):
         lb = max(0, i-window_size)
         rb = min(i + window_size, len(array))
@@ -37,11 +38,11 @@ def create_fingerprint(audio_path, id, index):
             max_j = result[1][0]
             max_i -= window_size
             max_j -= window_size
-            if array[i+max_i][j + max_j] > 0.05:
+            if array[i+max_i][j + max_j] > 0.2:
                 frame_peaks.append([j + max_j, i+max_i])
         peaks.extend(frame_peaks)
 
-    pair_num = 20
+    pair_num = 10
     peaks = sorted(peaks, key=lambda s: s[1])
     for i in range(len(peaks)):
         for j in range(1, pair_num):

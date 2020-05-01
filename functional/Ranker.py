@@ -3,12 +3,12 @@ from fingerprint import create_fingerprint
 import time
 
 if __name__ == '__main__':
-    with open('../test_dir/index.p','rb') as rf:
+    with open('../test_dir/index.p', 'rb') as rf:
         index = pickle.load(rf)
-    with open('../test_dir/track_ids.p','rb') as rf:
+    with open('../test_dir/track_ids.p', 'rb') as rf:
         track_ids = pickle.load(rf)
     start_time = time.time()
-    fingerprint = create_fingerprint('noize.mp3',-1,{})
+    fingerprint = create_fingerprint('noize.mp3', -1, {})
     print('Fingerprint creating time: ', time.time() - start_time)
     scores = {}
     largest = 0
@@ -54,4 +54,3 @@ if __name__ == '__main__':
     # print(result_song)
     #
     # print(sorted(scores.items(), key=lambda kv: kv[1], reverse=True)[:5])
-

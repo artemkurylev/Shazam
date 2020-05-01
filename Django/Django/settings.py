@@ -86,8 +86,16 @@ DATABASES = {
         'PASSWORD': 'postgres',
         'HOST': '127.0.0.1',
         'PORT': '5432',
-    }
+    },
+    # 'aws': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'database-2',
+    #     'USER': 'postgres',
+    #     'PASSWORD': 'e3f5c7123',
+    #     'HOST': ''
+    # }
 }
+DATABASE_ROUTERS = ['Django.shazam_router.ShazamRouter']
 
 
 # Password validation
