@@ -58,7 +58,7 @@ def upload_audio(request):
     print(song_id)
     song = Song.objects.using('postgres').get(id=song_id)
     print(song.name)
-    return HttpResponse("Found song:{}".format(song.name))
+    return HttpResponse('Found song:{}'.format(song.name))
 
 
 def upload_song(request):

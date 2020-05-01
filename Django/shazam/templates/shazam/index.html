@@ -16,7 +16,11 @@
 </div>
 <h3>Recordings</h3>
 <ol id="recordingsList"></ol>
-<h2>Upload your own song</h2>
+
+<div id="own">
+    <h2>Upload your own song</h2>
+</div>
+
 <form enctype="multipart/form-data" method="post" action="song_uploaded/">
     {% csrf_token %}
     <label>

@@ -17,6 +17,7 @@ recordButton.addEventListener("click", startRecording);
 stopButton.addEventListener("click", stopRecording);
 pauseButton.addEventListener("click", pauseRecording);
 function startRecording() { console.log("recordButton clicked");
+
 /* Simple constraints object, for more advanced audio features see
 
 https://addpipe.com/blog/audio-constraints-getusermedia/ */
@@ -85,7 +86,7 @@ function stopRecording() {
 }
 function createDownloadLink(blob) {
     var url = URL.createObjectURL(blob);
-    var au = document.createElement('audio');
+    let au = document.createElement('audio');
     var li = document.createElement('li');
     var link = document.createElement('a');
     //add controls to the <audio> element
@@ -124,17 +125,27 @@ function createDownloadLink(blob) {
     upload.addEventListener("click", function(event) {
         var xhr = new XMLHttpRequest();
         xhr.onload = function(e) {
+            let result_song;
+            let el;
             if (this.readyState === 4) {
                 console.log("Server returned: ", e.target.responseText);
+                result_song = document.createElement('h2');
+                result_song.innerHTML = e.target.responseText;
+                el = document.getElementById("own");
+                document.body.insertBefore(result_song, el);
             }
         };
+
         var fd = new FormData();
         fd.append("audio_data", blob, filename);
 
         xhr.open("POST",url="upload_audio/");
         xhr.setRequestHeader("X-CSRFToken", csrftoken);
         xhr.send(fd);
+
     })
+    var text = document.createElement('li');
+    li.appendChild(document.createTextNode('Text'))
     li.appendChild(document.createTextNode(" ")) //add a space in between
     li.appendChild(upload) //add the upload link to li
     recordingsList.appendChild(li);

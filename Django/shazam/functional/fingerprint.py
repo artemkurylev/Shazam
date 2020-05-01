@@ -56,7 +56,7 @@ def create_fingerprint(audio_path, id, index):
             t1 = peaks[i][1]
             t2 = peaks[i+j][1]
             t_delta = t2 - t1
-            if 0 <= t_delta < 200:
+            if 50 <= t_delta < 200:
                 string = str(str(freq1)+'|'+str(freq2) + '|'+str(t_delta))
                 x = hashlib.sha1(string.encode())
                 if x.hexdigest() in index:
@@ -65,7 +65,6 @@ def create_fingerprint(audio_path, id, index):
                     index.update({x.hexdigest(): [(t1, id)]})
 
     return index
-
 
 if __name__ == '__main__':
     index = {}
