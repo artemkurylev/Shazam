@@ -129,8 +129,14 @@ function createDownloadLink(blob) {
             let el;
             if (this.readyState === 4) {
                 console.log("Server returned: ", e.target.responseText);
-                result_song = document.createElement('h2');
+                result_song = document.getElementById('result')
+                if (result_song == null){
+                    result_song = document.createElement('h2');
+                    result_song.id = 'result';
+                }
                 result_song.innerHTML = e.target.responseText;
+
+
                 el = document.getElementById("own");
                 document.body.insertBefore(result_song, el);
             }
@@ -144,8 +150,6 @@ function createDownloadLink(blob) {
         xhr.send(fd);
 
     })
-    var text = document.createElement('li');
-    li.appendChild(document.createTextNode('Text'))
     li.appendChild(document.createTextNode(" ")) //add a space in between
     li.appendChild(upload) //add the upload link to li
     recordingsList.appendChild(li);
