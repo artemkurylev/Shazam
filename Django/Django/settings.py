@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-
+import environ
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -24,7 +24,11 @@ SECRET_KEY = 't0x!s)eeej6+x+wlx1g6_7tjbcr2vyu6sc2!v51e#nw4bmnd$3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, True)
+)
+environ.Env.read_env()
 ALLOWED_HOSTS = []
 
 
@@ -79,14 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     },
-    'postgres': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'songs',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
-    },
+    'postgres': env.db('DATABASE_URL')
     # 'aws': {
     #     'ENGINE': 'django.db.backends.postgresql',
     #     'NAME': 'database-2',

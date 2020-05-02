@@ -14,6 +14,7 @@ import soundfile as sf
 import audioread
 
 
+
 @csrf_protect
 def index(request):
     template = loader.get_template('shazam/index.html')
@@ -39,7 +40,7 @@ def upload_audio(request):
     for idx, one_hash in enumerate(fingerprint):
         print(idx, 'of', len(fingerprint))
         try:
-            matches = Fingerprint.objects.using('postgres').filter(hash_value=one_hash)
+            matches = Fingerprint.objects.filter(hash_value=one_hash)
             for matched_fingerprint in matches:
                 for x in fingerprint[one_hash]:
                     time_delta = matched_fingerprint.time_stamp - x[0]
@@ -56,9 +57,13 @@ def upload_audio(request):
         except Fingerprint.DoesNotExist:
             pass
     print(song_id)
-    song = Song.objects.using('postgres').get(id=song_id)
+    try:
+        song = Song.objects.get(id=song_id)
+    except Song.DoesNotExist:
+        return HttpResponse("Song unfortunately wasn't found, but be sure it will be added shortly!!!")
+
     print(song.name)
-    return HttpResponse('Found song:{}'.format(song.name))
+    return HttpResponse('Found song:{} : {}'.format(song.author, song.name))
 
 
 def upload_song(request):
@@ -72,13 +77,20 @@ def song_uploaded(request):
     result = request.FILES.get('music')
     song_name = request.POST.get('song_name')
     song_author = request.POST.get('author')
-    if result.name.endswith('.wav'):
-        audio_file = result.read()
-        s = io.BytesIO(audio_file)
-        sr = 44100
-        data, sample_rate = sf.read(s)
-        sf.write('2.wav', data, samplerate=44100)
-        full_fingerprint = create_fingerprint('2.wav', -1, {})
+    try:
+        if result.name.endswith('.wav'):
+            audio_file = result.read()
+            s = io.BytesIO(audio_file)
+            sr = 44100
+            data, sample_rate = sf.read(s)
+            sf.write('2.wav', data, samplerate=44100)
+            full_fingerprint = create_fingerprint('2.wav', -1, {})
+        elif result.name.endswith('.mp3'):
+            with open('x.mp3', 'wb') as mp:
+                mp.write(result.read())
+                mp.close()
+                full_fingerprint = create_fingerprint('x.mp3', -1, {})
+
         latest_song = Song.objects.last()
 
         song = Song.objects.create(id=latest_song.id + 1, name=song_name, author=song_author)
@@ -88,4 +100,11 @@ def song_uploaded(request):
                 fingerprint = Fingerprint.objects.create(id=print_id, hash_value=i, song_id_id=song.id,
                                                          time_stamp=int(full_fingerprint[i][j][0]))
                 print_id += 1
-    return HttpResponse('Song uploadedd!')
+
+        return HttpResponse('Song uploadedd!')
+
+    except Exception as err:
+        return HttpResponse('Something went wrong:', err)
+
+
+
