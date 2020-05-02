@@ -4,5 +4,9 @@ functional/*.mp3
 audio_database/
 test_dir/
 *.wav
-
+.env
+*.conf
+Django/shazam/migrations/
+*.json
+*.sqlite3
 
