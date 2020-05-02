@@ -1,15 +1,15 @@
 from django.shortcuts import render
 import io
 # Create your views here.
-from django.http import HttpResponse
+from django.http import HttpResponse,StreamingHttpResponse
 from django.template import loader
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_protect
 from shazam.functional.fingerprint import create_fingerprint
+from shazam.matcher import find_maximal_match
 from shazam.models import Fingerprint
 from shazam.models import Song
 import soundfile as sf
-
 
 
 @csrf_protect
@@ -29,31 +29,7 @@ def upload_audio(request):
     fingerprint = create_fingerprint('2.wav', -1, {})
     all_matches = []
 
-    scores = {}
-    largest = 0
-    largest_diff = 0
-    song_id = -1
-
-    for idx, one_hash in enumerate(fingerprint):
-        print(idx, 'of', len(fingerprint))
-        try:
-            matches = Fingerprint.objects.filter(hash_value=one_hash)
-            for matched_fingerprint in matches:
-                for x in fingerprint[one_hash]:
-                    time_delta = matched_fingerprint.time_stamp - x[0]
-                    if time_delta not in scores:
-                        scores.update({time_delta: {}})
-                    if matched_fingerprint.song_id not in scores[time_delta]:
-                        scores[time_delta].update({matched_fingerprint.song_id: 0})
-                    scores[time_delta][matched_fingerprint.song_id] += 1
-                    if scores[time_delta][matched_fingerprint.song_id] > largest:
-                        largest_diff = time_delta
-                        largest = scores[time_delta][matched_fingerprint.song_id]
-                        song_id = matched_fingerprint.song_id.id
-                        print(matched_fingerprint.song_id.name)
-        except Fingerprint.DoesNotExist:
-            pass
-    print(song_id)
+    song_id, largest_count = find_maximal_match(fingerprint)
     try:
         song = Song.objects.get(id=song_id)
     except Song.DoesNotExist:
@@ -70,6 +46,12 @@ def upload_song(request):
 
 @require_POST
 @csrf_protect
+def song_upload_wrapper(request):
+    return StreamingHttpResponse(song_uploaded(request))
+
+
+@require_POST
+@csrf_protect
 def song_uploaded(request):
     result = request.FILES.get('music')
     song_name = request.POST.get('song_name')
@@ -80,28 +62,35 @@ def song_uploaded(request):
             s = io.BytesIO(audio_file)
             sr = 44100
             data, sample_rate = sf.read(s)
-            sf.write('2.wav', data, samplerate=44100)
+            sf.write(song_name + '2.wav', data, samplerate=44100)
             full_fingerprint = create_fingerprint('2.wav', -1, {})
         elif result.name.endswith('.mp3'):
             with open('x.mp3', 'wb') as mp:
                 mp.write(result.read())
                 mp.close()
-                full_fingerprint = create_fingerprint('x.mp3', -1, {})
+                full_fingerprint, hash_num = create_fingerprint('x.mp3', -1, {})
 
         latest_song = Song.objects.last()
+        new_song_id = latest_song.id + 1
 
-        song = Song.objects.create(id=latest_song.id + 1, name=song_name, author=song_author)
         print_id = Fingerprint.objects.last().id + 1
+        fingerprints = []
         for i in full_fingerprint:
             for j in range(len(full_fingerprint[i])):
-                fingerprint = Fingerprint.objects.create(id=print_id, hash_value=i, song_id_id=song.id,
-                                                         time_stamp=int(full_fingerprint[i][j][0]))
+                fingerprints.append(Fingerprint(id=print_id, hash_value=i, song_id_id=new_song_id,
+                                                time_stamp=int(full_fingerprint[i][j][0])))
                 print_id += 1
 
-        return HttpResponse('Song uploadedd!')
+        yield 'Song uploaded, now checking for matches in our database..'
 
+        song_id, count = find_maximal_match(full_fingerprint)
+        if count <= hash_num / 10:
+            song = Song.objects.create(id=new_song_id, name=song_name, author=song_author)
+            for fingerprint in fingerprints:
+                fingerprint.save()
+            yield'Song successfully saved in database'
+        else:
+            name = Song.objects.get(id=song_id).name
+            yield '<p>It seems, that this song is actually duplicate of this song: ' + name + '</p>'
     except Exception as err:
         return HttpResponse('Something went wrong:', err)
-
-
-

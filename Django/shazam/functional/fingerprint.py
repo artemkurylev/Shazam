@@ -33,6 +33,7 @@ def create_fingerprint(audio_path, id, index):
             points.append((x_center, y_center))
     points = sorted(points)
     pair_num = 20
+    hash_num = 0
     for i in range(len(points)):
         for j in range(1, pair_num):
             if i + j >= len(points):
@@ -43,21 +44,23 @@ def create_fingerprint(audio_path, id, index):
             t1 = points[i][0]
             t2 = points[i+j][0]
             t_delta = t2 - t1
-            if 50 <= t_delta < 100 and abs(freq1 - freq2) < 100:
+            if 20 <= t_delta < 100 and abs(freq1 - freq2) < 50:
                 string = str(str(freq1)+'|'+str(freq2) + '|'+str(t_delta))
-                x = hashlib.sha1(string.encode())
+                x = hashlib.sha256(string.encode())
                 if x.hexdigest() in index:
                     index[x.hexdigest()].append((t1, id))
                 else:
                     index.update({x.hexdigest(): [(t1, id)]})
+                hash_num += 1
 
-    return index
+    return index, hash_num
+
 
 if __name__ == '__main__':
     index = {}
     id_names = {}
-    for idx, i in enumerate(os.listdir('audio_database/')):
-        index = create_fingerprint(os.path.join('audio_database', i), idx, index)
+    for idx, i in enumerate(os.listdir('../../../audio_database/')):
+        index, _ = create_fingerprint(os.path.join('audio_database', i), idx, index)
         id_names.update({idx: i})
     with open('test_dir/index.p', 'wb') as wf:
         pickle.dump(index, wf)

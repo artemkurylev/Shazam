@@ -12,7 +12,7 @@ def fill_db(db_connection, path_to_base):
         if file.endswith('.mp3') or file.endswith('.wav'):
             print(idx, 'of', len(tracks))
             id_names.update({idx: file})
-            index = create_fingerprint(os.path.join(path_to_base, file), idx, index)
+            index, _ = create_fingerprint(os.path.join(path_to_base, file), idx, index)
     cursor = db_connection.cursor()
 
     postgres_insert_song_query = 'INSERT INTO shazam_song (id, name, author) VALUES (%s,%s, %s)'
