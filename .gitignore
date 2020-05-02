@@ -6,7 +6,6 @@ test_dir/
 *.wav
 .env
 *.conf
-Django/shazam/migrations/
 *.json
 *.sqlite3
 

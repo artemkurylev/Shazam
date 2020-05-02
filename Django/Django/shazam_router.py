@@ -3,7 +3,7 @@ class ShazamRouter:
     A router to control all database operations on models in the
     auth and contenttypes applications.
     """
-    route_app_labels = {'shazam', 'contenttypes'}
+    route_app_labels = {'shazam', 'contenttypes', 'auth', 'admin', 'session'}
 
     def db_for_read(self, model, **hints):
         """
