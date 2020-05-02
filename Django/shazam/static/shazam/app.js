@@ -124,8 +124,17 @@ function createDownloadLink(blob) {
     upload.innerHTML = "Upload";
     upload.addEventListener("click", function(event) {
         var xhr = new XMLHttpRequest();
+        let result_song;
+        result_song = document.getElementById('result')
+        if (result_song == null){
+            result_song = document.createElement('h2');
+            result_song.id = 'result';
+        }
+        result_song.innerHTML = 'Searching for the track...';
+        el = document.getElementById("own");
+        document.body.insertBefore(result_song, el);
         xhr.onload = function(e) {
-            let result_song;
+
             let el;
             if (this.readyState === 4) {
                 console.log("Server returned: ", e.target.responseText);
@@ -137,8 +146,7 @@ function createDownloadLink(blob) {
                 result_song.innerHTML = e.target.responseText;
 
 
-                el = document.getElementById("own");
-                document.body.insertBefore(result_song, el);
+
             }
         };
 
