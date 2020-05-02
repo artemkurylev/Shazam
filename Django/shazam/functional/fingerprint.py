@@ -15,8 +15,9 @@ import time
 from hashlib import md5
 
 
-def create_fingerprint(audio_path, id, index):
+def create_fingerprint(audio_path, song_id, index):
     audio, sr = librosa.load(audio_path, 22050)
+    print(librosa.get_duration(audio))
     neighborhood_size = 40
     S = librosa.feature.melspectrogram(audio, sr=sr, n_mels=256, fmax=4000)
     S = librosa.power_to_db(S, ref=np.max)
@@ -32,6 +33,7 @@ def create_fingerprint(audio_path, id, index):
         if (dx.stop - dx.start) * (dy.stop - dy.start) == 1:
             points.append((x_center, y_center))
     points = sorted(points)
+    print('Points number', len(points))
     pair_num = 20
     hash_num = 0
     for i in range(len(points)):
@@ -48,11 +50,11 @@ def create_fingerprint(audio_path, id, index):
                 string = str(str(freq1)+'|'+str(freq2) + '|'+str(t_delta))
                 x = hashlib.sha256(string.encode())
                 if x.hexdigest() in index:
-                    index[x.hexdigest()].append((t1, id))
+                    index[x.hexdigest()].append((t1, song_id))
                 else:
-                    index.update({x.hexdigest(): [(t1, id)]})
+                    index.update({x.hexdigest(): [(t1, song_id)]})
                 hash_num += 1
-
+    print('Hash_num', hash_num)
     return index, hash_num
 
 

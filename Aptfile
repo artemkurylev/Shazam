@@ -1,1 +1,11 @@
-libasound2-dev python-dev python-numpy python-setuptools libsndfile-dev
+libasound2-dev
+python-dev
+python-numpy
+python-setuptools
+libsndfile-dev
+ffmpeg
+libavcodec-extra-53
+libavcodec-extra-53
+libsndfile1
+libsndfile-dev
+libav-tools

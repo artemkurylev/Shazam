@@ -13,7 +13,6 @@ class Song(models.Model):
     author = models.CharField(max_length=200)
 
     class Meta:
-        managed = True
         db_table = 'shazam_song'
     #objects = SongManager(using='postgres')
 
@@ -29,7 +28,6 @@ class Fingerprint(models.Model):
     time_stamp = models.IntegerField()
 
     class Meta:
-        managed = True
         db_table = 'shazam_fingerprint'
         indexes = [
             models.Index(fields=['hash_value',]),

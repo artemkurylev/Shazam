@@ -30,7 +30,7 @@ env = environ.Env(
     DEBUG=(bool, True)
 )
 environ.Env.read_env()
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1','0.0.0.0/0',]
 
 
 # Application definition

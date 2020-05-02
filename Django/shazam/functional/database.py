@@ -5,7 +5,7 @@ from shazam.functional.fingerprint import create_fingerprint
 
 
 def fill_db(db_connection, path_to_base):
-    tracks = os.listdir(path_to_base)
+    tracks = os.listdir(path_to_base)[:2]
     index = {}
     id_names = {}
     for idx, file in enumerate(tracks):
@@ -24,11 +24,12 @@ def fill_db(db_connection, path_to_base):
         cursor.execute(postgres_insert_song_query, song)
         db_connection.commit()
 
-    for i in index:
+    for idx, i in enumerate(index):
+        print(idx, ' of ', len(index))
         for j in range(len(index[i])):
             fingerprint = (i, int(index[i][j][1]), int(index[i][j][0]))
             cursor.execute(postgres_insert_fingerprint_query, fingerprint)
-    db_connection.commit()
+            db_connection.commit()
 
 
 if __name__ == '__main__':
