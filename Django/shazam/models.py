@@ -31,5 +31,8 @@ class Fingerprint(models.Model):
     class Meta:
         managed = True
         db_table = 'shazam_fingerprint'
+        indexes = [
+            models.Index(fields=['hash_value',]),
+        ]
 
 
