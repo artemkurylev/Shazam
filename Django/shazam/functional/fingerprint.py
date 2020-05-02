@@ -1,5 +1,7 @@
 import librosa
 import os
+
+from scipy import ndimage
 from scipy.ndimage.filters import maximum_filter
 from scipy.ndimage.morphology import (generate_binary_structure,
                                       iterate_structure, binary_erosion)
@@ -15,48 +17,33 @@ from hashlib import md5
 
 def create_fingerprint(audio_path, id, index):
     audio, sr = librosa.load(audio_path, 22050)
-    stft = np.log10(np.abs(librosa.stft(y=audio, n_fft=1024))) * 10
+    neighborhood_size = 40
+    S = librosa.feature.melspectrogram(audio, sr=sr, n_mels=256, fmax=4000)
+    S = librosa.power_to_db(S, ref=np.max)
+    # get local maxima
+    Sb = maximum_filter(S, neighborhood_size) == S
 
-    stft[stft == -np.inf] = 0
-    print(stft.shape)
-    array = np.transpose(stft)
-    print(librosa.get_duration(audio) * 1000 / len(array))
-    peaks = []
-    width_window_size = 30
-    height_window_size = 30
-    for i in range(0, len(array), height_window_size * 2):
-        lb = max(0, i-height_window_size)
-        rb = min(i + height_window_size, len(array))
-        frame_peaks = []
-        for j in range(0, len(array[i]), width_window_size * 2):
-            bb = max(j - width_window_size, 0)
-            ub = min(j + width_window_size, len(array[i]))
-
-            block = array[lb:rb, bb:ub]
-
-            result = np.where(block == np.amax(block))
-
-            max_i = result[0][0]
-            max_j = result[1][0]
-            max_i -= height_window_size
-            max_j -= width_window_size
-            if array[i+max_i][j + max_j] > 0.5:
-                frame_peaks.append([j + max_j, i+max_i])
-        peaks.extend(frame_peaks)
-
+    Sbd, num_objects = ndimage.label(Sb)
+    objs = ndimage.find_objects(Sbd)
+    points = []
+    for dy, dx in objs:
+        x_center = (dx.start + dx.stop - 1) // 2
+        y_center = (dy.start + dy.stop - 1) // 2
+        if (dx.stop - dx.start) * (dy.stop - dy.start) == 1:
+            points.append((x_center, y_center))
+    points = sorted(points)
     pair_num = 20
-    peaks = sorted(peaks, key=lambda s: s[1])
-    for i in range(len(peaks)):
+    for i in range(len(points)):
         for j in range(1, pair_num):
-            if i + j >= len(peaks):
+            if i + j >= len(points):
                 break
 
-            freq1 = peaks[i][0]
-            freq2 = peaks[i + j][0]
-            t1 = peaks[i][1]
-            t2 = peaks[i+j][1]
+            freq1 = points[i][1]
+            freq2 = points[i + j][1]
+            t1 = points[i][0]
+            t2 = points[i+j][0]
             t_delta = t2 - t1
-            if 50 <= t_delta < 200:
+            if 50 <= t_delta < 100 and abs(freq1 - freq2) < 100:
                 string = str(str(freq1)+'|'+str(freq2) + '|'+str(t_delta))
                 x = hashlib.sha1(string.encode())
                 if x.hexdigest() in index:
