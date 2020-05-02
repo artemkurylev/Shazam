@@ -1,17 +1,14 @@
 from django.shortcuts import render
 import io
-from pydub import AudioSegment
 # Create your views here.
 from django.http import HttpResponse
 from django.template import loader
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_protect
 from shazam.functional.fingerprint import create_fingerprint
-import time
 from shazam.models import Fingerprint
 from shazam.models import Song
 import soundfile as sf
-import audioread
 
 
 
